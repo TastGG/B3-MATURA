@@ -1,0 +1,298 @@
+procedure TFrmGlumci.FormActivate(Sender: TObject);
+var i: integer;
+begin
+StringGrid.ColWidths[3]:=110;
+StringGrid.ColWidths[4]:=110;
+i:=0;
+dm.GLUMAC.open;
+dm.glumac.First;
+while (not(dm.glumac.Eof)) do
+  begin
+    StringGrid.cells[0,i]:=dm.glumac.fieldbyname('GlumacID').AsString;
+    StringGrid.cells[1,i]:=dm.glumac.fieldbyname('Ime').AsString;
+    StringGrid.cells[2,i]:=dm.glumac.fieldbyname('Prezime').AsString;
+    StringGrid.cells[3,i]:=dm.glumac.fieldbyname('DatumRodjenja').AsString;
+    StringGrid.cells[4,i]:=dm.glumac.fieldbyname('MestoRodjenja').AsString;
+    i:=i+1;
+    dm.glumac.Next;
+  end;
+  StringGrid.RowCount:=i;
+dm.glumac.Close;
+end;
+
+----------------------------------------------------------------------------------
+
+procedure TFrmGlumci.btnUpisiClick(Sender: TObject);
+var i, int, provera: integer;
+begin
+dm.glumac.Open;
+val(editSifra.text, int, provera);
+if((editSifra.text<>'')and(editIme.text<>'')and(editPrezime.text<>'')and(editDatum.text<>'')) then
+  begin
+    if(provera=0) then
+      begin
+        if(dm.GLUMAC.Locate('GlumacID', editSifra.text, [])=false) then
+        begin
+        dm.glumac.Append;
+        dm.GLUMAC.FieldByName('GlumacID').Value:=StrToInt(editSifra.Text);
+        dm.GLUMAC.FieldByName('Ime').Value:=editIme.Text;
+        dm.GLUMAC.FieldByName('Prezime').Value:=editPrezime.Text;
+        dm.GLUMAC.FieldByName('DatumRodjenja').Value:=StrToDate(editDatum.Text);
+        dm.GLUMAC.FieldByName('MestoRodjenja').Value:=editMesto.Text;
+        dm.GLUMAC.Post;
+        showmessage('Uspesno upisan glumac');
+        i:=0;
+        dm.glumac.first;
+        while(not(dm.glumac.Eof)) do
+          begin
+            StringGrid.Cells[0,i]:=dm.glumac.fieldbyname('GlumacID').AsString;
+            StringGrid.Cells[1,i]:=dm.glumac.fieldbyname('Ime').AsString;
+            StringGrid.Cells[2,i]:=dm.glumac.fieldbyname('Prezime').AsString;
+            StringGrid.Cells[3,i]:=dm.glumac.fieldbyname('DatumRodjenja').AsString;
+            StringGrid.Cells[4,i]:=dm.glumac.fieldbyname('MestoRodjenja').AsString;
+            i:=i+1;
+            dm.GLUMAC.Next;
+          end;
+          StringGrid.RowCount:=i;
+        end else
+        begin
+          showmessage('Glumac sa ovom sifrom vec postoji');
+          editSifra.text:=dm.GLUMAC.fieldbyname('GlumacID').Value;
+          editIme.text:=dm.GLUMAC.fieldbyname('Ime').Value;
+          editPrezime.text:=dm.GLUMAC.fieldbyname('Prezime').Value;
+          editDatum.text:=dm.GLUMAC.fieldbyname('DatumRodjenja').Value;
+          editMesto.text:=dm.GLUMAC.fieldbyname('MestoRodjenja').Value;
+          end;
+      end else
+        showmessage('Sifra mora biti broj');
+  end else
+    showmessage('Morate uneti obavezna polja');
+
+
+dm.GLUMAC.Close;
+
+end;
+
+---------------------------------------------------------------------------------------
+
+procedure TFrmGlumci.btnObrisiClick(Sender: TObject);
+var i, int, provera: integer;
+begin
+dm.GLUMAC.Open;
+val(editSifra.Text, int, provera);
+if(editSifra.Text<>'') then
+  begin
+    if(provera=0) then
+      begin
+        if(dm.GLUMAC.locate('GlumacID', editSifra.text, [])=true) then
+          begin
+            dm.glumac.Locate('GlumacID', editSifra.text, []);
+            dm.GLUMAC.delete;
+            showmessage('Uspesno obrisano');
+            i:=0;
+            dm.GLUMAC.first;
+            while(not(dm.glumac.Eof)) do
+              begin
+                StringGrid.cells[0,i]:=dm.glumac.fieldbyname('GlumacID').AsString;
+                StringGrid.cells[1,i]:=dm.glumac.fieldbyname('Ime').AsString;
+                StringGrid.cells[2,i]:=dm.glumac.fieldbyname('Prezime').AsString;
+                StringGrid.cells[3,i]:=dm.glumac.fieldbyname('DatumRodjenja').AsString;
+                StringGrid.cells[4,i]:=dm.glumac.fieldbyname('MestoRodjenja').AsString;
+                i:=i+1;
+                dm.glumac.Next;
+              end;
+              StringGrid.RowCount:=i;
+          end else
+            showmessage('Ovakva sifra ne postoji!');
+      end else
+        showmessage('Sifra mora biti broj!');
+  end else
+    showmessage('Potrebno uneti sifru');
+dm.GLUMAC.close;
+
+end;
+
+--------------------------------------------------------------------------------------------
+
+procedure TFrmGlumci.btnIzmeniClick(Sender: TObject);
+var i, int, provera: integer;
+begin
+dm.glumac.Open;
+val(editSifra.Text, int, provera);
+if((editSifra.Text<>'')and(editIme.text<>'')and(editPrezime.text<>'')and(editDatum.text<>'')) then
+  begin
+    if(provera=0) then
+      begin
+        if(dm.GLUMAC.locate('GlumacID', editSifra.text, [])=true) then
+          begin
+            dm.GLUMAC.Locate('GlumacID', editSifra.text, []);
+            dm.GLUMAC.edit;
+            dm.glumac.fieldbyname('Ime').value:=editIme.text;
+            dm.glumac.fieldbyname('Prezime').value:=editPrezime.text;
+            dm.glumac.fieldbyname('DatumRodjenja').value:=StrToDate(editDatum.text);
+            dm.glumac.fieldbyname('MestoRodjenja').value:=editMesto.text;
+            dm.glumac.Post;
+            showmessage('Uspesno izmenjeni podaci');
+            i:=0;
+            dm.GLUMAC.first;
+            while(not(dm.glumac.Eof)) do
+              begin
+                StringGrid.Cells[0,i]:=dm.GLUMAC.fieldbyname('GlumacID').AsString;
+                StringGrid.Cells[1,i]:=dm.GLUMAC.fieldbyname('Ime').AsString;
+                StringGrid.Cells[2,i]:=dm.GLUMAC.fieldbyname('Prezime').AsString;
+                StringGrid.Cells[3,i]:=dm.GLUMAC.fieldbyname('DatumRodjenja').AsString;
+                StringGrid.Cells[4,i]:=dm.GLUMAC.fieldbyname('MestoRodjenja').AsString;
+                i:=``````i+1;
+                dm.glumac.Next;
+              end;
+              StringGrid.RowCount:=i;
+          end else
+            showmessage('Ne postoji glumac sa tom sifrom');
+      end else
+        showmessage('Sifra mora biti broj');
+  end else
+    showmessage('Popunite obavezna polja!');
+
+dm.glumac.Close;
+
+end;
+
+------------------------------------------------------------------------------------------
+ZANROVI
+------------------------------------------------------------------------------------------
+procedure TformZanrovi.FormActivate(Sender: TObject);
+  var
+    i, j, br: integer;
+    niz: array[1..100] of string;
+    temp: string;
+  begin
+    cbZanr.Text:='';           
+    cbZanr.ItemIndex:=-1;
+    editIme.Text:='';
+    editPrezime.Text:='';
+    StringGrid.FixedCols:=0;         
+    StringGrid.FixedRows:=0;
+    StringGrid.GridLineWidth:=0;
+    StringGrid.ColCount:=3;
+    StringGrid.ColWidths[0]:=99;
+    StringGrid.ColWidths[1]:=99;
+    StringGrid.ColWidths[2]:=99;
+    StringGrid.RowCount:=0;
+    br:=0;
+    dm.ZANR.Open;                     
+    dm.ZANR.First;
+    while(not(dm.ZANR.Eof)) do
+      begin
+        br:=br+1;
+        niz[br]:=dm.ZANR.FieldByName('NazivZanra').Value;
+        dm.ZANR.Next;
+      end;
+    dm.ZANR.Close;
+    for i:=1 to br-1 do
+      for j:=i+1 to br do
+        if(niz[i]<niz[j])
+          then
+            begin
+              temp:=niz[i];
+              niz[i]:=niz[j];
+              niz[j]:=temp;
+            end;
+    for i:=1 to br do
+      cbZanr.Items.Add(niz[i]);
+  end;
+
+-----------------------------------------------------------------------------
+
+procedure TformZanrovi.btnPrikaziClick(Sender: TObject);
+  var
+    rezultati: array[1..100] of rezultat;
+    temp: rezultat;
+    br, ind, i, j: integer;
+  begin
+    dm.ZANR.Open;
+    dm.GLUMAC.Open;
+    dm.FILM.Open;
+    dm.ULOGA.Open;
+    dm.TIP_ULOGE.Open;
+    StringGrid.RowCount:=0;        
+    StringGrid.Cells[0, 0]:='';     
+    StringGrid.Cells[1, 0]:='';    
+    StringGrid.Cells[2, 0]:='';
+    if((cbZanr.ItemIndex<>-1) and (editIme.Text<>'') and (editPrezime.Text<>'')) 
+      then
+        begin
+          ind:=0;
+          dm.GLUMAC.First;
+          while(not(dm.GLUMAC.Eof)) do
+            begin
+              if((dm.GLUMAC.FieldByName('Ime').Value=editIme.Text) and (dm.GLUMAC.FieldByName('Prezime').Value=editPrezime.Text)) 
+                then
+                  begin
+                    ind:=dm.GLUMAC.FieldByName('GlumacID').Value; 
+                    break;
+                  end;
+              dm.GLUMAC.Next;
+            end;
+          if(ind<>0) //ako je glumac nadjen
+            then
+              begin
+                dm.ZANR.Locate('NazivZanra', cbZanr.Text, []);
+                dm.GLUMAC.Locate('GlumacID', ind, []);
+                br:=0;
+                dm.FILM.First;
+                while(not(dm.FILM.Eof)) do
+                  begin
+                    if(dm.FILM.FieldByName('ZanrID').Value=dm.ZANR.FieldByName('ZanrID').Value) 
+                      then
+                        begin
+                          dm.ULOGA.First;
+                          while(not(dm.ULOGA.Eof)) do
+                            begin
+                              if((dm.ULOGA.FieldByName('FilmID').Value=dm.FILM.FieldByName('FilmID').Value) and (dm.ULOGA.FieldByName('GlumacID').Value=ind)) 
+                                  begin
+                                    br:=br+1;
+                                    dm.TIP_ULOGE.Locate('TipUlogeID', dm.ULOGA.FieldByName('TipUlogeID').Value, []);
+                                    rezultati[br].film:=dm.FILM.FieldByName('Naziv').Value;        
+                                    rezultati[br].uloga:=dm.ULOGA.FieldByName('ImeLika').Value;
+                                    rezultati[br].tipUloge:=dm.TIP_ULOGE.FieldByName('Tip').Value;
+                                    rezultati[br].trajanje:=dm.FILM.FieldByName('Trajanje').Value;
+                                  end;
+                              dm.ULOGA.Next;
+                            end;
+                        end;
+                    dm.FILM.Next;
+                  end;
+                if(br<>0) //ukoliko su nadjeni rezultati pretrage
+                  then
+                    begin
+                      for i:=0 to br-1 do                               
+                        for j:=i+1 to br do
+                          if(rezultati[i].trajanje<rezultati[j].trajanje)
+                            then
+                              begin
+                                temp:=rezultati[j];
+                                rezultati[j]:=rezultati[i];
+                                rezultati[i]:=temp;
+                              end;
+                      for i:=0 to br do                                  
+                        begin
+                          StringGrid.Cells[0, i]:=rezultati[i+1].film;
+                          StringGrid.Cells[1, i]:=rezultati[i+1].uloga;
+                          StringGrid.Cells[2, i]:=rezultati[i+1].tipUloge;
+                        end;
+                      StringGrid.RowCount:=br;
+                    end
+                  else
+                    showmessage('Nema rezultata za unete parametre!');
+              end
+            else
+                showmessage('Ne postoji takav glumac!');
+        end
+      else
+        showmessage('Polja Naziv zanra i Ime glumca (ili) Prezime glumca su obavezna!');
+    dm.ZANR.Close;
+    dm.GLUMAC.Close;
+    dm.FILM.Close;
+    dm.ULOGA.Close;
+    dm.TIP_ULOGE.Close;
+  end;
